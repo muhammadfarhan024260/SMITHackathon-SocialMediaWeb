@@ -40,9 +40,35 @@ function createId() {
   return String(Date.now()) + Math.random().toString(16).slice(2);
 }
 
+function setTheme(mode) {
+  if (mode === "dark") document.documentElement.classList.add("dark");
+  else document.documentElement.classList.remove("dark");
+  if (themeToggle) themeToggle.innerHTML = mode === "dark" ? iconMoon() : iconSun();
+}
+
+function applyFilter(v) {
+  if (filterSelect) filterSelect.value = v;
+  updateFilterLabel();
+  setActiveFilterMenu();
+  renderPosts();
+}
+
+function showCreateSection() {
+  if (createSection) createSection.classList.remove("hidden");
+  if (postText) {
+    postText.scrollIntoView({ behavior: "smooth", block: "center" });
+    postText.focus();
+  }
+}
+
+function getLikeCount(p) {
+  if (!p) return 0;
+  if (Array.isArray(p.likedBy)) return p.likedBy.length;
+  return typeof p.likes === "number" ? p.likes : 0;
+}
+
 function addPost(text, imageUrl) {
-  let me = null;
-  try { me = JSON.parse(localStorage.getItem("currentUser")); } catch (_) {}
+  const me = getCurrentUser();
   const p = {
     id: createId(),
     text,
@@ -107,7 +133,7 @@ function renderPostHTML(post) {
   const me = getCurrentUser();
   const likedBy = Array.isArray(post.likedBy) ? post.likedBy : [];
   const isLiked = me && me.id ? likedBy.includes(String(me.id)) : false;
-  const count = likedBy.length || (typeof post.likes === "number" ? post.likes : 0);
+  const count = getLikeCount(post);
   const heart = iconHeart(isLiked);
   const isOwner = me && me.id && String(post.authorId) === String(me.id);
   if (editingId === String(post.id)) {
@@ -164,7 +190,7 @@ function renderPosts() {
   if (q) posts = posts.filter((p) => String(p.text).toLowerCase().includes(q));
   if (sort === "latest") posts.sort((a, b) => b.createdAt - a.createdAt);
   else if (sort === "oldest") posts.sort((a, b) => a.createdAt - b.createdAt);
-  else if (sort === "liked") posts.sort((a, b) => (Array.isArray(b.likedBy)?b.likedBy.length:(typeof b.likes==="number"?b.likes:0)) - (Array.isArray(a.likedBy)?a.likedBy.length:(typeof a.likes==="number"?a.likes:0)) || b.createdAt - a.createdAt);
+  else if (sort === "liked") posts.sort((a, b) => getLikeCount(b) - getLikeCount(a) || b.createdAt - a.createdAt);
   postsContainer.innerHTML = posts.map(renderPostHTML).join("");
 }
 
@@ -189,8 +215,7 @@ function setActiveFilterMenu() {
 }
 
 function toggleLike(id) {
-  let me = null;
-  try { me = JSON.parse(localStorage.getItem("currentUser")); } catch (_) {}
+  const me = getCurrentUser();
   if (!me || !me.id) {
     alert("Please login to like posts.");
     window.location.href = "login.html";
@@ -250,11 +275,9 @@ function init() {
   }
   const savedTheme = localStorage.getItem("theme");
   const mode = savedTheme === "dark" ? "dark" : "light";
-  if (mode === "dark") document.documentElement.classList.add("dark");
-  else document.documentElement.classList.remove("dark");
-  if (themeToggle) themeToggle.innerHTML = mode === "dark" ? iconMoon() : iconSun();
+  setTheme(mode);
   if (usernameEl) {
-    const n = localStorage.getItem("username");
+    const n = (me && me.username) ? me.username : localStorage.getItem("username");
     if (n) usernameEl.textContent = n;
   }
   updateFilterLabel();
@@ -285,9 +308,7 @@ if (searchInput) {
 
 if (filterSelect) {
   filterSelect.addEventListener("change", function () {
-    updateFilterLabel();
-    setActiveFilterMenu();
-    renderPosts();
+    applyFilter(filterSelect.value);
   });
 }
 
@@ -305,12 +326,7 @@ if (filterDropdownMenu) {
     if (!btn) return;
     const v = btn.getAttribute("data-filter");
     if (!v) return;
-    if (filterSelect) {
-      filterSelect.value = v;
-      updateFilterLabel();
-      setActiveFilterMenu();
-      renderPosts();
-    }
+    applyFilter(v);
     filterDropdownMenu.classList.add("hidden");
   });
 }
@@ -353,9 +369,7 @@ if (themeToggle) {
     const isDark = document.documentElement.classList.contains("dark");
     const next = isDark ? "light" : "dark";
     localStorage.setItem("theme", next);
-    if (next === "dark") document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
-    themeToggle.innerHTML = next === "dark" ? iconMoon() : iconSun();
+    setTheme(next);
   });
 }
 
@@ -379,12 +393,8 @@ if (sidebar) {
         searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
         searchInput.focus();
       }
-    } else if (nav === "create") {
-      if (createSection) createSection.classList.remove("hidden");
-      if (postText) {
-        postText.scrollIntoView({ behavior: "smooth", block: "center" });
-        postText.focus();
-      }
+  } else if (nav === "create") {
+      showCreateSection();
     }
   });
 }
