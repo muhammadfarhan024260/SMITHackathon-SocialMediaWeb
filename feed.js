@@ -421,6 +421,15 @@ if (mobileNav) {
     }
   });
 }
+const logoutBtnMobile = document.getElementById("logoutBtnMobile");
+if (logoutBtnMobile) {
+  logoutBtnMobile.addEventListener("click", function (e) {
+    e.preventDefault();
+    localStorage.removeItem("currentUser");
+    localStorage.removeItem("username");
+    window.location.href = "login.html";
+  });
+}
 function getAllUsers() {
   const raw = localStorage.getItem("users");
   if (!raw) return [];
