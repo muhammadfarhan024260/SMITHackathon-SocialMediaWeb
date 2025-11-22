@@ -414,6 +414,10 @@ if (mobileNav) {
       }
     } else if (nav === "create") {
       showCreateSection();
+    } else if (nav === "logout") {
+      localStorage.removeItem("currentUser");
+      localStorage.removeItem("username");
+      window.location.href = "login.html";
     }
   });
 }
