@@ -14,6 +14,7 @@ const logoutBtn = document.getElementById("logoutBtn");
 const sidebar = document.querySelector("aside");
 const createSection = document.getElementById("createSection");
 const mobileNav = document.getElementById("mobileNav");
+const EMOJIS = ['👍','❤️','😂','🎉','😮','😢'];
 let editingId = null;
 
 function getPosts() {
@@ -62,6 +63,38 @@ function showCreateSection() {
   }
 }
 
+function getReactionCounts(p) {
+  const counts = {};
+  for (let i = 0; i < EMOJIS.length; i++) counts[EMOJIS[i]] = 0;
+  const map = p && p.reactionsBy && typeof p.reactionsBy === 'object' ? p.reactionsBy : null;
+  if (map) {
+    const vals = Object.values(map);
+    for (let i = 0; i < vals.length; i++) {
+      const e = vals[i];
+      if (typeof e === 'string' && counts.hasOwnProperty(e)) counts[e]++;
+    }
+  }
+  return counts;
+}
+
+function updateReaction(id, emoji) {
+  const me = getCurrentUser();
+  if (!me || !me.id) {
+    alert("Please login to react to posts.");
+    window.location.href = "login.html";
+    return;
+  }
+  const posts = getPosts();
+  const i = posts.findIndex((p) => String(p.id) === String(id));
+  if (i === -1) return;
+  if (!posts[i].reactionsBy || typeof posts[i].reactionsBy !== 'object') posts[i].reactionsBy = {};
+  const uid = String(me.id);
+  const current = posts[i].reactionsBy[uid];
+  if (current === emoji) delete posts[i].reactionsBy[uid];
+  else posts[i].reactionsBy[uid] = emoji;
+  setPosts(posts);
+}
+
 function getLikeCount(p) {
   if (!p) return 0;
   if (Array.isArray(p.likedBy)) return p.likedBy.length;
@@ -79,6 +112,7 @@ function addPost(text, imageUrl) {
     authorName: me && me.username ? String(me.username) : "Guest",
     likedBy: [],
     likes: 0,
+    reactionsBy: {},
   };
   const posts = getPosts();
   posts.unshift(p);
@@ -137,6 +171,8 @@ function renderPostHTML(post) {
   const count = getLikeCount(post);
   const heart = iconHeart(isLiked);
   const isOwner = me && me.id && String(post.authorId) === String(me.id);
+  const rc = getReactionCounts(post);
+  const summary = EMOJIS.map((e)=> rc[e] > 0 ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200 text-xs">${e}<span>${rc[e]}</span></span>` : '').join('');
   if (editingId === String(post.id)) {
     const safeText = escapeHtml(post.text || "");
     const safeImg = escapeHtml(imgSrc || "");
@@ -172,12 +208,18 @@ function renderPostHTML(post) {
       <div class="mt-3 text-gray-800 dark:text-gray-100 whitespace-pre-wrap">${escapeHtml(post.text)}</div>
       ${img}
       <div class="mt-3 flex items-center justify-between">
-        <span></span>
+        <span class="flex flex-wrap gap-1">${summary}</span>
         <div class="flex items-center gap-2">
           <button class="h-9 w-9 rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 hover:dark:bg-gray-600 text-gray-700 dark:text-gray-200 transition flex items-center justify-center" data-action="like" data-id="${post.id}" aria-label="Like">${heart}</button>
           <span class="text-gray-800 dark:text-gray-200 font-semibold">${count}</span>
+          <button class="h-9 w-9 rounded-md bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 hover:dark:bg-gray-600 text-gray-700 dark:text-gray-200 transition flex items-center justify-center" data-action="react-menu" data-id="${post.id}" aria-label="React">🙂</button>
           ${isOwner ? `<button class="h-9 w-9 rounded-md bg-yellow-100 hover:bg-yellow-200 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800 transition flex items-center justify-center" data-action="edit" data-id="${post.id}" aria-label="Edit">${iconPencil()}</button>` : ``}
           ${isOwner ? `<button class="h-9 w-9 rounded-md bg-red-100 hover:bg-red-200 dark:bg-red-900/30 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800 transition flex items-center justify-center" data-action="delete" data-id="${post.id}" aria-label="Delete">${iconTrash()}</button>` : ``}
+        </div>
+      </div>
+      <div id="reactMenu-${post.id}" class="mt-2 hidden">
+        <div class="flex items-center gap-2">
+          ${EMOJIS.map((e)=>`<button class="h-8 px-2 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100" data-action="react" data-id="${post.id}" data-emoji="${e}">${e}</button>`).join('')}
         </div>
       </div>
     </div>
@@ -346,6 +388,16 @@ if (postsContainer) {
     if (!id || !action) return;
     if (action === "like") {
       toggleLike(id);
+    } else if (action === "react-menu") {
+      const m = document.getElementById(`reactMenu-${id}`);
+      if (m) m.classList.toggle("hidden");
+      return;
+    } else if (action === "react") {
+      const emoji = btn.getAttribute("data-emoji");
+      if (!emoji) return;
+      updateReaction(id, emoji);
+      const m = document.getElementById(`reactMenu-${id}`);
+      if (m) m.classList.add("hidden");
     } else if (action === "delete") {
       const ok = confirm("Delete this post?");
       if (!ok) return;
