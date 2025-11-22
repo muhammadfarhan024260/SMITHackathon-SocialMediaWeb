@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script>(function(){try{var t=localStorage.getItem('theme');if(t==='dark'){document.documentElement.classList.add('dark');}else{document.documentElement.classList.remove('dark');}}catch(e){}})();</script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: 'class' }</script>
+  <title>Login</title>
+</head>
+<body class="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-950">
+  <div class="min-h-screen flex items-center justify-center px-4">
+    <div class="w-full max-w-md bg-white/80 dark:bg-gray-800/80 p-6 rounded-2xl shadow-lg ring-1 ring-black/5 dark:ring-white/10">
+      <h1 class="text-2xl font-bold text-gray-800 dark:text-gray-100">Welcome back</h1>
+      <p class="text-sm text-gray-600 dark:text-gray-300">Sign in to continue</p>
+      <form id="loginForm" class="mt-6 space-y-4">
+        <div>
+          <label class="block text-sm text-gray-700 dark:text-gray-300">Username or Email</label>
+          <input id="loginIdentifier" type="text" class="mt-1 w-full p-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <div>
+          <label class="block text-sm text-gray-700 dark:text-gray-300">Password</label>
+          <input id="loginPassword" type="password" class="mt-1 w-full p-3 rounded-xl border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-900 text-gray-800 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+        <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white p-3 rounded-xl font-semibold">Login</button>
+        <p id="loginMsg" class="text-sm text-red-600 dark:text-red-400"></p>
+      </form>
+      <p class="mt-4 text-sm text-gray-600 dark:text-gray-300">No account? <a href="signup.html" class="text-indigo-600">Sign up</a></p>
+    </div>
+  </div>
+  <script src="auth.js"></script>
+</body>
+</html>
