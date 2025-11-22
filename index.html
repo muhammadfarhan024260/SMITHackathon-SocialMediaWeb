@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="style.css">
 </head>
 
-<body class="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-950">
+<body class="min-h-screen bg-gradient-to-b from-gray-100 to-gray-200 dark:from-gray-900 dark:to-gray-950 pb-16 md:pb-0">
 
     
 
@@ -79,6 +79,22 @@
             <div class="mt-2 text-center">Made By MUHAMMAD FARHAN</div>
         </div>
     </footer>
+    <div id="mobileNav" class="fixed bottom-0 left-0 right-0 md:hidden border-t border-gray-200 dark:border-gray-800 bg-white/90 dark:bg-gray-900/90 backdrop-blur">
+        <div class="max-w-6xl mx-auto px-4 py-2 flex items-center justify-around">
+            <button data-nav="home" class="flex flex-col items-center gap-1 text-gray-800 dark:text-gray-100">
+                <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12l9-9 9 9v9a2 2 0 01-2 2h-4a2 2 0 01-2-2v-5H9v5a2 2 0 01-2 2H3z"></path></svg>
+                <span class="text-xs">Home</span>
+            </button>
+            <button data-nav="search" class="flex flex-col items-center gap-1 text-gray-800 dark:text-gray-100">
+                <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg>
+                <span class="text-xs">Search</span>
+            </button>
+            <button data-nav="create" class="flex flex-col items-center gap-1 text-gray-800 dark:text-gray-100">
+                <svg viewBox="0 0 24 24" class="h-6 w-6" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"></path></svg>
+                <span class="text-xs">Create</span>
+            </button>
+        </div>
+    </div>
     <script src="feed.js"></script>
 </body>
 

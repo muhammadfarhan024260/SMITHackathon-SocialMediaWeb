@@ -13,6 +13,7 @@ const themeToggle = document.getElementById("themeToggle");
 const logoutBtn = document.getElementById("logoutBtn");
 const sidebar = document.querySelector("aside");
 const createSection = document.getElementById("createSection");
+const mobileNav = document.getElementById("mobileNav");
 let editingId = null;
 
 function getPosts() {
@@ -393,7 +394,25 @@ if (sidebar) {
         searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
         searchInput.focus();
       }
-  } else if (nav === "create") {
+    } else if (nav === "create") {
+      showCreateSection();
+    }
+  });
+}
+if (mobileNav) {
+  mobileNav.addEventListener("click", function (e) {
+    const t = e.target;
+    const btn = t && t.closest ? t.closest("button[data-nav]") : null;
+    if (!btn) return;
+    const nav = btn.getAttribute("data-nav");
+    if (nav === "home") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } else if (nav === "search") {
+      if (searchInput) {
+        searchInput.scrollIntoView({ behavior: "smooth", block: "center" });
+        searchInput.focus();
+      }
+    } else if (nav === "create") {
       showCreateSection();
     }
   });
